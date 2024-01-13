@@ -11,4 +11,9 @@ class Product extends Model
 
     protected $fillable = ['name', 'quantity', 'gross_unit_price'];
 
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class)->withPivot('quantity');
+    }
+    
 }

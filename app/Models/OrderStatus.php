@@ -13,6 +13,6 @@ class OrderStatus extends Model
 
     public function orders()
     {
-        return $this->hasMany(Order::class, 'status_id');
+        return $this->hasMany(Order::class, 'order_status_id');
     }
 }

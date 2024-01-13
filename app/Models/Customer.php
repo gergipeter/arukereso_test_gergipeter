@@ -9,15 +9,10 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'email', 'billing_address_id', 'shipping_address_id'];
+    protected $fillable = ['name', 'email'];
 
-    public function billingAddress()
+    public function orders()
     {
-        return $this->belongsTo(Address::class, 'billing_address_id');
-    }
-
-    public function shippingAddress()
-    {
-        return $this->belongsTo(Address::class, 'shipping_address_id');
+        return $this->hasMany(Order::class);
     }
 }

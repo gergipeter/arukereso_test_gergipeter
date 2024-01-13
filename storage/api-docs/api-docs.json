@@ -1,0 +1,177 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Arukereso Orders API",
+        "description": "Test homework",
+        "contact": {
+            "email": "gergipeter@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/orders": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get list of orders",
+                "operationId": "getOrders",
+                "responses": {
+                    "200": {
+                        "description": "List of orders"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Create a new order",
+                "operationId": "createOrder",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Order"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/orders/{id}": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get a specific order by ID",
+                "operationId": "getOrderById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order details"
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Update a specific order by ID",
+                "operationId": "updateOrder",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Order"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order updated successfully"
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Delete a specific order by ID",
+                "operationId": "deleteOrder",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Order deleted successfully"
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Order": {
+                "required": [
+                    "order_status_id",
+                    "start_date",
+                    "end_date",
+                    "billing_address_id",
+                    "shipping_address_id",
+                    "shipping_method_id"
+                ],
+                "properties": {
+                    "order_status_id": {
+                        "type": "integer"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "billing_address_id": {
+                        "type": "integer"
+                    },
+                    "shipping_address_id": {
+                        "type": "integer"
+                    },
+                    "shipping_method_id": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    }
+}
