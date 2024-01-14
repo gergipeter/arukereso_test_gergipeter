@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
  *  @OA\OpenApi(
  *   @OA\ExternalDocumentation(
  *     description="More documentation here...",
- *     url="https://example.com/externaldoc1/"
+ *     url="https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf"
  *   )
  * )
  * @OA\Info(
