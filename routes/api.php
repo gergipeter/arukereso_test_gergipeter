@@ -19,13 +19,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-/*
 Route::prefix('orders')->group(function () {
-    Route::get('/', [OrderController::class, 'index']);
     Route::post('/', [OrderController::class, 'store']);
-    Route::get('/{id}', [OrderController::class, 'show']);
+    Route::post('/list', [OrderController::class, 'listOrders']);
     Route::put('/{id}', [OrderController::class, 'update']);
     Route::delete('/{id}', [OrderController::class, 'destroy']);
-});*/
 
-Route::resource('orders', OrderController::class);
+});
+
+//Route::resource('orders', OrderController::class);

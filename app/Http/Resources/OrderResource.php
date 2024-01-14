@@ -22,12 +22,6 @@ class OrderResource extends JsonResource
             'billing_address' => $this->billingAddress,
             'shipping_address' => $this->shippingAddress,
             'shipping_method' => $this->shippingMethod,
-            //'start_date' => '',
-            //'end_date' => '',
-         //   'customer_name' => $this->customer->name,
-        //    'billing_address' => Address::find($this->billing_address_id),
-        //    'shipping_address' => Address::find($this->shipping_address_id),
-        //    'shipping_method' => Address::find($this->shipping_method_id),
         ];
     }
 }

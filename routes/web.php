@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Order;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +15,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function (Request $request) {
+
+    $query = Order::query();
+
+    // Apply filters if provided
+    $query->where(function ($query) use ($request) {
+        $query->when($request->has('order_id'), function ($q) use ($request) {
+            return $q->where('id', 2);
+        })
+        ->when($request->has('order_status_id'), function ($q) use ($request) {
+            return $q->where('order_status_id', $request->input('order_status_id'));
+        })
+        ->when($request->has('start_date'), function ($q) use ($request) {
+            return $q->where('start_date', '>=', $request->input('start_date'));
+        })
+        ->when($request->has('end_date'), function ($q) use ($request) {
+            return $q->where('end_date', '<=', $request->input('end_date'));
+        });
+    });
+
+    dd($query);
+
+
+   // return view('welcome');
 });

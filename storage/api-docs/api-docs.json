@@ -6,22 +6,56 @@
         "contact": {
             "email": "gergipeter@gmail.com"
         },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
         "version": "1.0.0"
     },
     "paths": {
-        "/api/orders": {
-            "get": {
+        "/api/orders/list": {
+            "post": {
                 "tags": [
                     "Orders"
                 ],
-                "summary": "Get list of orders",
-                "operationId": "getOrders",
+                "summary": "List orders with filters",
+                "operationId": "listOrders",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "order_id": {
+                                        "type": "integer"
+                                    },
+                                    "order_status_id": {
+                                        "type": "integer"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "List of orders"
+                        "description": "List of filtered orders"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 }
-            },
+            }
+        },
+        "/api/orders": {
             "post": {
                 "tags": [
                     "Orders"
@@ -29,10 +63,109 @@
                 "summary": "Create a new order",
                 "operationId": "createOrder",
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Order"
+                                "required": [
+                                    "customer",
+                                    "shipping_method",
+                                    "billing_address",
+                                    "shipping_address",
+                                    "products"
+                                ],
+                                "properties": {
+                                    "customer": {
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "example": "John Doe"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "format": "email",
+                                                "example": "john.doe@example.com"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "shipping_method": {
+                                        "properties": {
+                                            "name": {
+                                                "description": "New shipping method name",
+                                                "type": "string",
+                                                "enum": [
+                                                    "pickup",
+                                                    "home_delivery"
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "billing_address": {
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "example": "John Doe"
+                                            },
+                                            "postal_code": {
+                                                "type": "string",
+                                                "example": "12345"
+                                            },
+                                            "city": {
+                                                "type": "string",
+                                                "example": "Example City"
+                                            },
+                                            "street": {
+                                                "type": "string",
+                                                "example": "123 Example Street"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "shipping_address": {
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Jane Doe"
+                                            },
+                                            "postal_code": {
+                                                "type": "string",
+                                                "example": "54321"
+                                            },
+                                            "city": {
+                                                "type": "string",
+                                                "example": "Another City"
+                                            },
+                                            "street": {
+                                                "type": "string",
+                                                "example": "456 Another Street"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "products": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Product A"
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "gross_unit_price": {
+                                                    "type": "number",
+                                                    "example": 19.99
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -48,31 +181,6 @@
             }
         },
         "/api/orders/{id}": {
-            "get": {
-                "tags": [
-                    "Orders"
-                ],
-                "summary": "Get a specific order by ID",
-                "operationId": "getOrderById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Order details"
-                    },
-                    "404": {
-                        "description": "Order not found"
-                    }
-                }
-            },
             "put": {
                 "tags": [
                     "Orders"
@@ -90,10 +198,31 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "JSON input for updating order status",
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Order"
+                                "properties": {
+                                    "order_id": {
+                                        "description": "ID of the order to be updated",
+                                        "type": "integer"
+                                    },
+                                    "status": {
+                                        "properties": {
+                                            "name": {
+                                                "description": "New order status name",
+                                                "type": "string",
+                                                "enum": [
+                                                    "new",
+                                                    "completed"
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -132,6 +261,9 @@
                     },
                     "404": {
                         "description": "Order not found"
+                    },
+                    "500": {
+                        "description": "Failed to delete order"
                     }
                 }
             }
@@ -139,39 +271,211 @@
     },
     "components": {
         "schemas": {
-            "Order": {
+            "Address": {
                 "required": [
-                    "order_status_id",
-                    "start_date",
-                    "end_date",
-                    "billing_address_id",
-                    "shipping_address_id",
-                    "shipping_method_id"
+                    "name",
+                    "postal_code",
+                    "city",
+                    "street"
                 ],
                 "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Home"
+                    },
+                    "postal_code": {
+                        "type": "string",
+                        "example": "12345"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "City"
+                    },
+                    "street": {
+                        "type": "string",
+                        "example": "Street 123"
+                    }
+                },
+                "type": "object"
+            },
+            "Customer": {
+                "required": [
+                    "name",
+                    "email"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    }
+                },
+                "type": "object"
+            },
+            "Order": {
+                "required": [
+                    "customer_id",
+                    "order_status_id",
+                    "shipping_method_id",
+                    "billing_address_id",
+                    "shipping_address_id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "customer_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "customer_name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
                     "order_status_id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "order_status_name": {
+                        "type": "string",
+                        "example": "Completed"
+                    },
+                    "shipping_method_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "shipping_method_name": {
+                        "type": "string",
+                        "example": "Express Shipping"
+                    },
+                    "billing_address_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "billing_address_name": {
+                        "type": "string",
+                        "example": "123 Main St, City"
+                    },
+                    "shipping_address_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "shipping_address_name": {
+                        "type": "string",
+                        "example": "456 Oak St, City"
                     },
                     "start_date": {
                         "type": "string",
-                        "format": "date"
+                        "format": "date",
+                        "example": "2024-01-13"
                     },
                     "end_date": {
                         "type": "string",
-                        "format": "date"
+                        "format": "date",
+                        "example": "2024-01-20"
+                    }
+                },
+                "type": "object"
+            },
+            "OrderProduct": {
+                "required": [
+                    "order_id",
+                    "product_id",
+                    "quantity"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
                     },
-                    "billing_address_id": {
-                        "type": "integer"
+                    "order_id": {
+                        "type": "integer",
+                        "example": 1
                     },
-                    "shipping_address_id": {
-                        "type": "integer"
+                    "product_id": {
+                        "type": "integer",
+                        "example": 1
                     },
-                    "shipping_method_id": {
-                        "type": "integer"
+                    "quantity": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "OrderStatus": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "new"
+                    }
+                },
+                "type": "object"
+            },
+            "Product": {
+                "required": [
+                    "name",
+                    "gross_unit_price"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Product A"
+                    },
+                    "gross_unit_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 29.99
+                    }
+                },
+                "type": "object"
+            },
+            "ShippingMethod": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "home_delivery"
                     }
                 },
                 "type": "object"
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Orders",
+            "description": "API endpoints"
+        }
+    ]
 }

@@ -5,7 +5,9 @@ namespace Database\Seeders;
 use App\Models\Address;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\OrderProduct;
 use App\Models\OrderStatus;
+use App\Models\Product;
 use App\Models\ShippingMethod;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -34,6 +36,20 @@ class OrderSeeder extends Seeder
                 ])
             ->create();
 
+        
+        OrderProduct::factory(50)
+            ->has(Order::factory())
+            ->has(Product::factory())
+            ->recycle([
+                $customers,
+                $billingAddresses,
+                $shippingAddresses,
+                $existingShippingMethods,
+                $existingOrderStatuses,
+                $orders
+                ])
+            ->create();
+
         foreach ($orders as $order) {
             $shippingMethod = $existingShippingMethods->random();
             $orderStatus = $existingOrderStatuses->random();
@@ -46,6 +62,5 @@ class OrderSeeder extends Seeder
                 'order_status_id' => $orderStatus->id,
             ]);
         }
-    
     }
 }

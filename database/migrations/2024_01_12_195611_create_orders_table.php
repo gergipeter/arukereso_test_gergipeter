@@ -25,8 +25,8 @@ return new class extends Migration
             $table->foreignId('billing_address_id')->constrained('addresses')->restrictOnDelete();
             $table->foreignId('shipping_address_id')->constrained('addresses')->restrictOnDelete();
             
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
 
             $table->timestamps();
         });
