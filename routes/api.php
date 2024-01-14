@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\MethodNotAllowedException;
 use App\Http\Controllers\Api\OrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,12 +20,21 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::resource('orders', OrderController::class)->only(['store', 'listOrders', 'update']);
+
 Route::prefix('orders')->group(function () {
-    Route::post('/', [OrderController::class, 'store']);
-    Route::post('/list', [OrderController::class, 'listOrders']);
-    Route::put('/{id}', [OrderController::class, 'update']);
-    Route::delete('/{id}', [OrderController::class, 'destroy']);
+   // Route::delete('/{id}', [OrderController::class, 'destroy']);
+
+    Route::get('/', function () {
+        throw new MethodNotAllowedException('The GET method is not supported for this route.');
+    });
+
+    Route::get('/list', function () {
+        throw new MethodNotAllowedException('The GET method is not supported for this route.');
+    });
+
+    Route::get('/{id}', function () {
+        throw new MethodNotAllowedException('The GET method is not supported for this route.');
+    });
 
 });
-
-//Route::resource('orders', OrderController::class);

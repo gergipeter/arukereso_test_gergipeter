@@ -27,4 +27,13 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof MethodNotAllowedException) {
+            return response()->json(['error' => $exception->getMessage()], 405);
+        }
+
+        return parent::render($request, $exception);
+    }
 }

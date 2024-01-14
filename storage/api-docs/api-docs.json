@@ -6,10 +6,6 @@
         "contact": {
             "email": "gergipeter@gmail.com"
         },
-        "license": {
-            "name": "MIT",
-            "url": "https://opensource.org/licenses/MIT"
-        },
         "version": "1.0.0"
     },
     "paths": {
@@ -28,8 +24,18 @@
                                     "order_id": {
                                         "type": "integer"
                                     },
-                                    "order_status_id": {
-                                        "type": "integer"
+                                    "status": {
+                                        "properties": {
+                                            "name": {
+                                                "description": "New order status name",
+                                                "type": "string",
+                                                "enum": [
+                                                    "new",
+                                                    "completed"
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
                                     },
                                     "start_date": {
                                         "type": "string",
@@ -341,41 +347,21 @@
                         "type": "integer",
                         "example": 1
                     },
-                    "customer_name": {
-                        "type": "string",
-                        "example": "John Doe"
-                    },
                     "order_status_id": {
                         "type": "integer",
                         "example": 1
-                    },
-                    "order_status_name": {
-                        "type": "string",
-                        "example": "Completed"
                     },
                     "shipping_method_id": {
                         "type": "integer",
                         "example": 1
                     },
-                    "shipping_method_name": {
-                        "type": "string",
-                        "example": "Express Shipping"
-                    },
                     "billing_address_id": {
                         "type": "integer",
                         "example": 1
                     },
-                    "billing_address_name": {
-                        "type": "string",
-                        "example": "123 Main St, City"
-                    },
                     "shipping_address_id": {
                         "type": "integer",
                         "example": 2
-                    },
-                    "shipping_address_name": {
-                        "type": "string",
-                        "example": "456 Oak St, City"
                     },
                     "start_date": {
                         "type": "string",
@@ -477,5 +463,9 @@
             "name": "Orders",
             "description": "API endpoints"
         }
-    ]
+    ],
+    "externalDocs": {
+        "description": "More documentation here...",
+        "url": "https://example.com/externaldoc1/"
+    }
 }

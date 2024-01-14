@@ -17,20 +17,18 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 
 /**
+ *  @OA\OpenApi(
+ *   @OA\ExternalDocumentation(
+ *     description="More documentation here...",
+ *     url="https://example.com/externaldoc1/"
+ *   )
+ * )
  * @OA\Info(
  *      title="Arukereso Orders API",
  *      version="1.0.0",
  *      description="Test homework",
  *      @OA\Contact(
  *          email="gergipeter@gmail.com"
- *      ),
- *      @OA\License(
- *          name="MIT",
- *          url="https://opensource.org/licenses/MIT"
- *      ),
- *      @OA\ExternalDocumentation(
- *          description="Additional Documentation",
- *          url="https://example.com/docs"
  *      ),
  * )
  *  * @OA\Tag(
@@ -68,7 +66,9 @@ class OrderController extends Controller
      *     @OA\RequestBody(
      *         @OA\JsonContent(
      *             @OA\Property(property="order_id", type="integer"),
-     *             @OA\Property(property="order_status_id", type="integer"),
+     *             @OA\Property(property="status", type="object",
+     *                 @OA\Property(property="name", type="string", description="New order status name", enum={"new", "completed"})
+     *             ),
      *             @OA\Property(property="start_date", type="string", format="date"),
      *             @OA\Property(property="end_date", type="string", format="date"),
      *         )
@@ -114,10 +114,12 @@ class OrderController extends Controller
                 });
             }
             
+            // if start_date filter is empty, or not given, get the earliest start_date as a parameter
             if ($request->has('start_date')) {
                 $query->where('start_date', $request->input('start_date'));
             }
             
+            // if end_date filter is empty, or not given, get the now(), today's date start_date as a parameter
             if ($request->has('end_date')) {
                 $query->where('end_date', $request->input('end_date'));
             }
@@ -200,6 +202,40 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        $requiredFields = [
+            'customer.name',
+            'customer.email',
+            'shipping_method',
+            'billing_address.name',
+            'billing_address.postal_code',
+            'billing_address.city',
+            'billing_address.street',
+            'shipping_address.name',
+            'shipping_address.postal_code',
+            'shipping_address.city',
+            'shipping_address.street',
+            'products',
+        ];
+    
+        foreach ($requiredFields as $field) {
+            if (!$request->has($field)) {
+                return response()->json(['error' => "Field '$field' is missing"], 422);
+            }
+        }
+    
+        // Check for missing fields in the 'products' array
+        $products = $request->input('products');
+        $productRequiredFields = ['name', 'quantity', 'gross_unit_price'];
+    
+        foreach ($products as $index => $product) {
+            foreach ($productRequiredFields as $field) {
+                $key = "products.$index.$field";
+                if (!isset($product[$field])) {
+                    return response()->json(['error' => "Field '$key' is missing"], 422);
+                }
+            }
+        }
+
         $request->validate([
             'customer.name' => 'required|string',
             'customer.email' => 'required|email',
@@ -255,12 +291,9 @@ class OrderController extends Controller
 
             // only can choose from the existing products, cannot create new ones
             if (!Product::where('name', $productData['name'])->exists()) {
-                return response()->json(['error' => 'Product is Invalid'], 422);
+                return response()->json(['error' => 'Product is Invalid'], 422); //TODO: do not create order
             } else {
-                $product = Product::create([
-                    'name' => $productData['name'],
-                    'gross_unit_price' => $productData['gross_unit_price'],
-                ]);
+                $product = Product::where('name', $productData['name'])->first();
             }
                     
             // Attach the product to the order with quantity
