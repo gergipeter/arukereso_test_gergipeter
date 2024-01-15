@@ -14,7 +14,7 @@
     cp .env.example .env (setup mysql username, and password)
     php artisan key:generate
     php artisan migrate
-    php artisan test
+    php artisan test --testdox
     php artisan db:seed
 
     php artisan serve
