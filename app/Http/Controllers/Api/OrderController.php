@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  *  @OA\OpenApi(
  *   @OA\ExternalDocumentation(
- *     description="More documentation here...",
+ *     description="Technical Document PDF",
  *     url="https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf"
  *   )
  * )
@@ -70,8 +70,8 @@ class OrderController extends Controller
      *             @OA\Property(property="status", type="object",
      *                 @OA\Property(property="name", type="string", description="New order status name", enum={"new", "completed"})
      *             ),
-     *             @OA\Property(property="start_date", type="string", format="date"),
-     *             @OA\Property(property="end_date", type="string", format="date"),
+     *             @OA\Property(property="from_date", type="string", format="date"),
+     *             @OA\Property(property="to_date", type="string", format="date"),
      *         )
      *     ),
      *     @OA\Response(response="200", description="List of filtered orders"),
@@ -80,13 +80,13 @@ class OrderController extends Controller
      */
      public function listOrders(Request $request)
      {
-        $allowedKeys = ['order_id', 'status', 'start_date', 'end_date'];
+        $allowedKeys = ['order_id', 'status', 'from_date', 'to_date'];
 
          $rules = [
              'order_id' => 'sometimes|integer',
              'status.name' => 'sometimes|string',
-             'start_date' => 'sometimes|date',
-             'end_date' => 'sometimes|date|after_or_equal:start_date',
+             'from_date' => 'sometimes|date',
+             'to_date' => 'sometimes|date|after_or_equal:from_date',
          ];
      
          try {
@@ -114,19 +114,17 @@ class OrderController extends Controller
                     $q->where('name', $request->input('status.name'));
                 });
             }
-            
-            // if start_date filter is empty, or not given, get the earliest start_date as a parameter
-            if ($request->has('start_date')) {
-                $query->where('start_date', $request->input('start_date'));
-            }
-            
-            // if end_date filter is empty, or not given, get the now(), today's date start_date as a parameter
-            if ($request->has('end_date')) {
-                $query->where('end_date', $request->input('end_date'));
-            }
-            
+
+            // Set default values for from_date and to_date if not provided in the JSON input
+            $fromDate = $request->input('from_date') ?? Order::min('order_date');
+            $toDate = $request->input('to_date') ?? now();
+
+            $query->whereBetween('order_date', [$fromDate, $toDate]);
+
+            //$debuQuery = $query->toRawSql();
+
             // Check if any filters are applied before fetching results
-            if ($request->hasAny(['order_id', 'status.name', 'start_date', 'end_date'])) {
+            if ($request->hasAny(['order_id', 'status.name', 'from_date', 'to_date'])) {
                 // Fetch the results
                 $results = $query->get();
 
@@ -142,8 +140,7 @@ class OrderController extends Controller
                         'order_id' => $order->id,
                         'order_status' => $order->orderStatus->name,
                         'customer_name' => $order->customer->name,
-                        'start_date' => $order->start_date,
-                        'end_date' => $order->end_date,
+                        'order_date' => $order->order_date,
                         'total_price' => $totalPrice,
                     ];
                 });
@@ -152,7 +149,7 @@ class OrderController extends Controller
                 return response()->json($responseData, Response::HTTP_OK);
             } else {
                 // No filters applied, return an empty response
-                return response()->json([], Response::HTTP_OK);
+                return response()->json(['asfsf'], Response::HTTP_OK);
             }
          } catch (QueryException $e) {
              return response()->json(['error' => $e], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -425,7 +422,7 @@ class OrderController extends Controller
                 $jsonMessage = 'Order status for order_id ' . $data['order_id'] . ' has not been changed';
             } else {
                 $order->update(['order_status_id' => $orderStatus->id]);
-                $jsonMessage = 'Order status for order_id ' . $data['order_id'] . ' has been updated from: ' . $orderStatusName . ' to: ' . $order->orderStatus->name;
+                $jsonMessage = 'Order status for order_id ' . $data['order_id'] . ' has been updated from: ' . $order->orderStatus->name . ' to: ' . $orderStatusName;
             }
     
             return ['message' => $jsonMessage, 'order_id' => $data['order_id']];

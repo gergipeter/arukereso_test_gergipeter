@@ -22,8 +22,8 @@ class OrderSeeder extends Seeder
         $existingOrderStatuses = OrderStatus::all();
         $existingShippingMethods = ShippingMethod::all();
 
-        $customers = Customer::factory(10)->create(); //10
-        $billingAddresses = Address::factory(10)->create(); //40
+        $customers = Customer::factory(10)->create();
+        $billingAddresses = Address::factory(10)->create();
         $shippingAddresses = Address::factory(10)->create();
 
         $orders = Order::factory(10)

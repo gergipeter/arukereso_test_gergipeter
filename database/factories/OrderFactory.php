@@ -15,12 +15,8 @@ class OrderFactory extends Factory
 {
     public function definition()
     {
-        $startDate = $this->faker->date;
-        $endDate = $this->faker->dateTimeBetween($startDate, 'now')->format('Y-m-d');
-
         return [
-            'start_date' => $startDate,
-            'end_date' => $endDate,
+            'order_date' => $this->faker->date,
             'customer_id' => Customer::factory(),
             'order_status_id' => OrderStatus::factory(),
             'billing_address_id' => Address::factory(),

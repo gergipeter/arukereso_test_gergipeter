@@ -15,15 +15,14 @@ use Illuminate\Database\Eloquent\Model;
  *     @OA\Property(property="shipping_method_id", type="integer", example=1),
  *     @OA\Property(property="billing_address_id", type="integer", example=1),
  *     @OA\Property(property="shipping_address_id", type="integer", example=2),
- *     @OA\Property(property="start_date", type="string", format="date", example="2024-01-13"),
- *     @OA\Property(property="end_date", type="string", format="date", example="2024-01-20"),
+ *     @OA\Property(property="order_date", type="string", format="date", example="2024-01-13"),
  * )
  */
 class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['customer_id', 'order_status_id', 'shipping_method_id', 'billing_address_id', 'shipping_address_id', 'start_date', 'end_date'];
+    protected $fillable = ['customer_id', 'order_status_id', 'shipping_method_id', 'billing_address_id', 'shipping_address_id', 'order_date'];
 
     public function orderStatus()
     {

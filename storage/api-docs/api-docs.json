@@ -36,11 +36,11 @@
                                         },
                                         "type": "object"
                                     },
-                                    "start_date": {
+                                    "from_date": {
                                         "type": "string",
                                         "format": "date"
                                     },
-                                    "end_date": {
+                                    "to_date": {
                                         "type": "string",
                                         "format": "date"
                                     }
@@ -320,15 +320,10 @@
                         "type": "integer",
                         "example": 2
                     },
-                    "start_date": {
+                    "order_date": {
                         "type": "string",
                         "format": "date",
                         "example": "2024-01-13"
-                    },
-                    "end_date": {
-                        "type": "string",
-                        "format": "date",
-                        "example": "2024-01-20"
                     }
                 },
                 "type": "object"
@@ -422,7 +417,7 @@
         }
     ],
     "externalDocs": {
-        "description": "More documentation here...",
+        "description": "Technical Document PDF",
         "url": "https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf"
     }
 }

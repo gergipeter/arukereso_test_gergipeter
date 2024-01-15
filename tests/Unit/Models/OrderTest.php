@@ -16,7 +16,7 @@ class OrderTest extends TestCase
     {
         $order = new Order();
 
-        $fillable = ['customer_id', 'order_status_id', 'shipping_method_id', 'billing_address_id', 'shipping_address_id', 'start_date', 'end_date'];
+        $fillable = ['customer_id', 'order_status_id', 'shipping_method_id', 'billing_address_id', 'shipping_address_id', 'order_date'];
 
         $this->assertEquals($fillable, $order->getFillable());
     }

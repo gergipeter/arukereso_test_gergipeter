@@ -32,8 +32,8 @@ class OrderControllerTest extends TestCase
         $filterData = [
             'order_id' => $order->id,
             'status' => ['name' => 'completed'],
-            'start_date' => '2022-01-01',
-            'end_date' => '2022-02-01',
+            'from_date' => '2012-01-01',
+            'to_date' => '2023-01-01'
         ];
 
         // Perform the API request
@@ -46,8 +46,7 @@ class OrderControllerTest extends TestCase
                     'order_id',
                     'order_status',
                     'customer_name',
-                    'start_date',
-                    'end_date',
+                    'order_date',
                     'total_price',
                 ],
             ]);
@@ -88,7 +87,7 @@ class OrderControllerTest extends TestCase
         // Adjust the expected message based on the actual response structure
         $expectedMessage = json_encode([
             'message' => [
-                'message' => "Order status for order_id {$order->id} has been updated from: new to: completed",
+                'message' => "Order status for order_id {$order->id} has been updated from: $status->name to: $newStatusName",
                 'order_id' => $order->id,
             ],
         ]);
