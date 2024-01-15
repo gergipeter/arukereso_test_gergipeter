@@ -297,6 +297,7 @@ class OrderController extends Controller
                 'billing_address_id' => $billingAddress->id,
                 'shipping_address_id' => $shippingAddress->id,
                 'shipping_method_id' => $shippingMethod->id,
+                'order_date' => now()
             ]);
 
             $order->products()->attach($attachedProducts);
