@@ -186,7 +186,13 @@ class OrderController extends Controller
      *     ),
      *     @OA\Property(property="products", type="array",
      *         @OA\Items(
-     *             @OA\Property(property="name", type="string", example="Product A"),
+     *             @OA\Property(property="name", type="string", example="Stellar"),
+     *             @OA\Property(property="quantity", type="integer", example=2),
+     *         )
+     *     ),
+     *     @OA\Property(property="products", type="array",
+     *         @OA\Items(
+     *             @OA\Property(property="name", type="string", example="Pinnacle"),
      *             @OA\Property(property="quantity", type="integer", example=2),
      *         )
      *     ),
