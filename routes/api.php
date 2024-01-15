@@ -20,10 +20,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::resource('orders', OrderController::class)->only(['store', 'listOrders', 'update']);
+//Route::resource('orders', OrderController::class)->only(['store', 'listOrders', 'updateStatus']);
 
 Route::prefix('orders')->group(function () {
-   // Route::delete('/{id}', [OrderController::class, 'destroy']);
+    Route::post('/', [OrderController::class, 'store']);
+    Route::post('/list', [OrderController::class, 'listOrders']);
+    Route::post('/updateStatus', [OrderController::class, 'updateOrderStatus']);
+    // Route::put('/{id}', [OrderController::class, 'update']);
+    // Route::delete('/{id}', [OrderController::class, 'destroy']);
 
     Route::get('/', function () {
         throw new MethodNotAllowedException('The GET method is not supported for this route.');
@@ -38,3 +42,8 @@ Route::prefix('orders')->group(function () {
     });
 
 });
+
+
+
+
+//Route::resource('orders', OrderController::class);

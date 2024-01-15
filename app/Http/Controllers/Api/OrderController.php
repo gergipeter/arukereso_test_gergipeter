@@ -15,6 +15,7 @@ use OpenApi\Annotations as OA;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  *  @OA\OpenApi(
@@ -26,7 +27,6 @@ use Illuminate\Http\Request;
  * @OA\Info(
  *      title="Arukereso Orders API",
  *      version="1.0.0",
- *      description="Test homework",
  *      @OA\Contact(
  *          email="gergipeter@gmail.com"
  *      ),
@@ -47,6 +47,7 @@ class OrderController extends Controller
      *     @OA\Response(response="200", description="List of orders"),
      * )
      */
+    // Implemented but not used yet
     /*
     public function index()
     {
@@ -94,11 +95,11 @@ class OrderController extends Controller
             // Check for unexpected keys in the JSON input
             $unexpectedKeys = array_diff(array_keys($request->all()), $allowedKeys);
             if (!empty($unexpectedKeys)) {
-                return response()->json(['error' => 'Invalid JSON input. Unexpected keys: ' . implode(', ', $unexpectedKeys)], 422);
+                return response()->json(['error' => 'Invalid JSON input. Unexpected keys: ' . implode(', ', $unexpectedKeys)], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
     
         } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
+            return response()->json(['errors' => $e->errors()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
          try {
@@ -148,13 +149,13 @@ class OrderController extends Controller
                 });
 
                 // Return the JSON response with results
-                return response()->json($responseData, 200);
+                return response()->json($responseData, Response::HTTP_OK);
             } else {
                 // No filters applied, return an empty response
-                return response()->json([], 200);
+                return response()->json([], Response::HTTP_OK);
             }
          } catch (QueryException $e) {
-             return response()->json(['error' => $e], 500);
+             return response()->json(['error' => $e], Response::HTTP_INTERNAL_SERVER_ERROR);
          }
      }
 
@@ -190,7 +191,6 @@ class OrderController extends Controller
      *         @OA\Items(
      *             @OA\Property(property="name", type="string", example="Product A"),
      *             @OA\Property(property="quantity", type="integer", example=2),
-     *             @OA\Property(property="gross_unit_price", type="number", example=19.99)
      *         )
      *     ),
      *          required={"customer", "shipping_method", "billing_address", "shipping_address", "products"}
@@ -219,19 +219,19 @@ class OrderController extends Controller
     
         foreach ($requiredFields as $field) {
             if (!$request->has($field)) {
-                return response()->json(['error' => "Field '$field' is missing"], 422);
+                return response()->json(['error' => "Field '$field' is missing"], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
         }
     
         // Check for missing fields in the 'products' array
         $products = $request->input('products');
-        $productRequiredFields = ['name', 'quantity', 'gross_unit_price'];
+        $productRequiredFields = ['name', 'quantity'];
     
         foreach ($products as $index => $product) {
             foreach ($productRequiredFields as $field) {
                 $key = "products.$index.$field";
                 if (!isset($product[$field])) {
-                    return response()->json(['error' => "Field '$key' is missing"], 422);
+                    return response()->json(['error' => "Field '$key' is missing"], Response::HTTP_UNPROCESSABLE_ENTITY);
                 }
             }
         }
@@ -251,7 +251,6 @@ class OrderController extends Controller
             'products' => 'required|array',
             'products.*.name' => 'required|string',
             'products.*.quantity' => 'required|integer',
-            'products.*.gross_unit_price' => 'required|numeric',
         ]);
     
         // Create Customer
@@ -267,57 +266,61 @@ class OrderController extends Controller
         $shippingAddress = Address::create($request->input('shipping_address'));
 
         $shippingMethodName = $request->input('shipping_method');
-        
+
         // only can choose from the existing shipping methods, cannot create new ones
         if (!ShippingMethod::where('name', $shippingMethodName)->exists()) {
-            return response()->json(['error' => 'Shipping Method is Invalid'], 422);
+            return response()->json(['error' => 'Shipping Method is Invalid'], Response::HTTP_UNPROCESSABLE_ENTITY);
         } else {
             $shippingMethod = ShippingMethod::where('name', $shippingMethodName)->first();
         }
-
-        // Create Order
-        $order = $customer->orders()->create([
-            'order_status_id' => 1, // new
-            'billing_address_id' => $billingAddress->id,
-            'shipping_address_id' => $shippingAddress->id,
-            'shipping_method_id' => $shippingMethod->id,
-        ]);
     
-        // Create Products
         $productsData = $request->input('products');
-        
+        $attachedProducts = [];
+
         // can add multiple products
         foreach ($productsData as $productData) {
-
             // only can choose from the existing products, cannot create new ones
-            if (!Product::where('name', $productData['name'])->exists()) {
-                return response()->json(['error' => 'Product is Invalid'], 422); //TODO: do not create order
-            } else {
-                $product = Product::where('name', $productData['name'])->first();
+            $product = Product::where('name', $productData['name'])->first();
+
+            if (!$product) {
+                return response()->json(['error' => 'Product is Invalid'], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
-                    
-            // Attach the product to the order with quantity
-            $order->products()->attach($product, ['quantity' => $productData['quantity']]);
+
+            $attachedProducts[] = [
+                'product_id' => $product->id,
+                'quantity' => $productData['quantity'],
+            ];
         }
-    
-        return response()->json([
-            'message' => 'Order created successfully',
-            'order_id' => $order->id,
-        ], 201);
+
+        try {
+            // Create Order
+            $orderStatus = OrderStatus::where('name', 'new')->first();
+            $order = $customer->orders()->create([
+                'order_status_id' => $orderStatus->id, // new
+                'billing_address_id' => $billingAddress->id,
+                'shipping_address_id' => $shippingAddress->id,
+                'shipping_method_id' => $shippingMethod->id,
+            ]);
+
+            $order->products()->attach($attachedProducts);
+
+            return response()->json([
+                'message' => 'Order created successfully',
+                'order_id' => $order->id,
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            // Handle the exception and return an error response
+            return response()->json(['error' => 'Failed to create order'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
-     * @OA\Put(
-     *     path="/api/orders/{id}",
-     *     operationId="updateOrder",
+     * @OA\Post(
+    *     path="/api/update-order-status",
+     *     summary="Update order status",
+     *     operationId="updateOrderStatus",
      *     tags={"Orders"},
      *     summary="Update a specific order by ID",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         description="JSON input for updating order status",
@@ -333,41 +336,27 @@ class OrderController extends Controller
      *     @OA\Response(response="422", description="Validation error"),
      * )
      */
-    public function update(Request $request)
+    public function updateOrderStatus(Request $request)
     {
-        $rules = [
-            'order_id' => 'required|exists:orders,id',
-            'status.name' => 'required|string',
-        ];
+        $requestData = json_decode($request->getContent(), true);
     
-        try {
-            $validatedData = $request->validate($rules);
+        if (is_array($requestData) && isset($requestData[0])) {
+            // If the JSON is an array, iterate through each order
+            $responseMessages = [];
     
-            $orderStatusName = $validatedData['status']['name'];
-    
-            // Check if the provided order status name exists in the database
-            $orderStatus = OrderStatus::where('name', $orderStatusName)->first();
-    
-            if (!$orderStatus) {
-                return response()->json(['errors' => ['status.name' => ['The provided order status name does not exist in the database.']]], 422);
+            foreach ($requestData as $data) {
+                $responseMessages[] = $this->processOrderData($data);
             }
     
-            $order = Order::findOrFail($validatedData['order_id']);
+            return response()->json(['messages' => $responseMessages], Response::HTTP_OK);
+        } elseif (is_array($requestData) && isset($requestData['order_id'])) {
+            // If the JSON is a single object, process the order directly
+            $responseMessage = $this->processOrderData($requestData);
     
-            // compare old status name with new status name
-            if ($orderStatusName == $order->orderStatus->name) {
-                $jsonMessage = 'Order status has not been changed';
-            } else {
-                $order->update(['order_status_id' => $orderStatus->id]);
-                $jsonMessage = 'Order status has been updated from ' . $orderStatusName . ' to: ' . $order->orderStatus->name;
-            }
-    
-            return response()->json(['message' => $jsonMessage], 200);
-    
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Order not found'], 404);
+            return response()->json(['message' => $responseMessage], Response::HTTP_OK);
+        } else {
+            // Invalid JSON format
+            return response()->json(['error' => 'Invalid JSON format'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
@@ -388,16 +377,63 @@ class OrderController extends Controller
      *     @OA\Response(response="500", description="Failed to delete order"),
      * )
      */
-    public function destroy(string $id)
+    // Implemented but not used yet
+    /* public function destroy(string $id)
     {
         try {
             $order = Order::findOrFail($id);
             $order->delete();
-            return response()->json(['message' => 'Order deleted successfully'], 204);
+            return response()->json(['message' => 'Order deleted successfully'], Response::HTTP_NO_CONTENT);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Order not found'], 404);
+            return response()->json(['error' => 'Order not found'], Response::HTTP_NOT_FOUND);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to delete order'], 500);
+            return response()->json(['error' => 'Failed to delete order'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    } */
+
+    /**
+     * Process and update order status based on the provided data.
+     *
+     * @param array $data The data containing order_id and status information.
+     * @return array An array containing a message or errors and the associated order_id.
+     */
+    private function processOrderData($data)
+    {
+        $rules = [
+            'order_id' => 'required|exists:orders,id',
+            'status.name' => 'required|string',
+        ];
+    
+        try {
+            $validator = validator($data, $rules);
+    
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+    
+            $orderStatusName = $data['status']['name'];
+    
+            $orderStatus = OrderStatus::where('name', $orderStatusName)->first();
+    
+            if (!$orderStatus) {
+                return ['errors' => ['status.name' => ['The provided order status name does not exist in the database.']], 'order_id' => $data['order_id']];
+            }
+    
+            $order = Order::findOrFail($data['order_id']);
+    
+            if ($orderStatusName == $order->orderStatus->name) {
+                $jsonMessage = 'Order status for order_id ' . $data['order_id'] . ' has not been changed';
+            } else {
+                $order->update(['order_status_id' => $orderStatus->id]);
+                $jsonMessage = 'Order status for order_id ' . $data['order_id'] . ' has been updated from: ' . $orderStatusName . ' to: ' . $order->orderStatus->name;
+            }
+    
+            return ['message' => $jsonMessage, 'order_id' => $data['order_id']];
+    
+        } catch (ValidationException $e) {
+            return ['errors' => $e->errors(), 'order_id' => $data['order_id']];
+        } catch (ModelNotFoundException $e) {
+            return ['error' => 'Order not found', 'order_id' => $data['order_id']];
         }
     }
 }

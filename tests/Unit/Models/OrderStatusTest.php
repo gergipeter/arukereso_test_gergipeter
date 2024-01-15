@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Tests\TestCase;
 use App\Models\OrderStatus;
 use App\Models\Order;
@@ -22,7 +23,7 @@ class OrderStatusTest extends TestCase
         $orderStatus = new OrderStatus();
 
         $this->assertInstanceOf(
-            \Illuminate\Database\Eloquent\Relations\HasMany::class,
+            HasMany::class,
             $orderStatus->orders()
         );
 

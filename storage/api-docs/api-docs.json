@@ -2,7 +2,6 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Arukereso Orders API",
-        "description": "Test homework",
         "contact": {
             "email": "gergipeter@gmail.com"
         },
@@ -161,10 +160,6 @@
                                                 "quantity": {
                                                     "type": "integer",
                                                     "example": 2
-                                                },
-                                                "gross_unit_price": {
-                                                    "type": "number",
-                                                    "example": 19.99
                                                 }
                                             },
                                             "type": "object"
@@ -186,23 +181,13 @@
                 }
             }
         },
-        "/api/orders/{id}": {
-            "put": {
+        "/api/update-order-status": {
+            "post": {
                 "tags": [
                     "Orders"
                 ],
                 "summary": "Update a specific order by ID",
-                "operationId": "updateOrder",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
+                "operationId": "updateOrderStatus",
                 "requestBody": {
                     "description": "JSON input for updating order status",
                     "required": true,
@@ -242,34 +227,6 @@
                     },
                     "422": {
                         "description": "Validation error"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Orders"
-                ],
-                "summary": "Delete a specific order by ID",
-                "operationId": "deleteOrder",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Order deleted successfully"
-                    },
-                    "404": {
-                        "description": "Order not found"
-                    },
-                    "500": {
-                        "description": "Failed to delete order"
                     }
                 }
             }
@@ -466,6 +423,6 @@
     ],
     "externalDocs": {
         "description": "More documentation here...",
-        "url": "https://example.com/externaldoc1/"
+        "url": "https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf"
     }
 }

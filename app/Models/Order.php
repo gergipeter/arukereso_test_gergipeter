@@ -23,7 +23,7 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['order_status_id', 'start_date', 'end_date', 'billing_address_id', 'shipping_address_id', 'shipping_method_id'];
+    protected $fillable = ['customer_id', 'order_status_id', 'shipping_method_id', 'billing_address_id', 'shipping_address_id', 'start_date', 'end_date'];
 
     public function orderStatus()
     {

@@ -2,100 +2,175 @@
 
 namespace Tests\Feature;
 
-use App\Models\Address;
-use App\Models\OrderStatus;
-use App\Models\ShippingMethod;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
+use App\Http\Controllers\Api\OrderController;
 use App\Models\Order;
+use App\Models\OrderStatus;
+use App\Models\Product;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\Response;
+use Tests\TestCase;
 
 class OrderControllerTest extends TestCase
 {
-   // use RefreshDatabase;
+    use RefreshDatabase;
 
-    public function test_can_get_all_orders()
+    /**
+     * Test listing orders with filters.
+     *
+     * @return void
+     */
+    public function testListOrdersWithFilters()
     {
-        $response = $this->getJson('/api/orders');
+        // Run the database seeds
+        $this->seed();
+        $order = Order::first();
 
-        $response->assertStatus(200)
-            ->assertJsonStructure(['data' => []]);
-    }
-
-    public function test_can_create_order()
-    {
-        $order = Order::factory()->create();
-        $orderStatus = OrderStatus::factory()->create();
-        $billingAddress = Address::findOrNew(1);
-        $shippingAddress = Address::findOrNew(1);
-        $shippingMethod = ShippingMethod::factory()->create();
-
-        $orderData = [
-            'id' => $order->id,
-            'start_date' => now()->format('Y-m-d'),
-            'end_date' => now()->addDays(5)->format('Y-m-d'),
-            'order_status_id' => $orderStatus->id,
-            'billing_address_id' => $billingAddress->id,
-            'shipping_address_id' => $shippingAddress->id,
-            'shipping_method_id' => $shippingMethod->id,
+        // Create test data for the filter
+        $filterData = [
+            'order_id' => $order->id,
+            'status' => ['name' => 'completed'],
+            'start_date' => '2022-01-01',
+            'end_date' => '2022-02-01',
         ];
 
-        $response = $this->postJson(route('orders.store'), $orderData);
+        // Perform the API request
+        $response = $this->json('POST', '/api/orders/list', $filterData);
 
-        $response->assertStatus(200)
-        ->assertJson([
-            'data' => [],
-            'message' => 'Order created successfully',
+        // Assert the response
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                '*' => [
+                    'order_id',
+                    'order_status',
+                    'customer_name',
+                    'start_date',
+                    'end_date',
+                    'total_price',
+                ],
+            ]);
+    }
+
+    /**
+     * Test updating order status with valid JSON.
+     *
+     * @return void
+     */
+    public function testUpdateOrderStatusWithValidJson()
+    {
+        $this->seed();
+        $order = Order::first();
+        $status = OrderStatus::where('id', $order->order_status_id)->first();
+        $newStatusName = ($status->name == 'new') ? 'completed' : 'new';
+
+        // Create a mock request with valid JSON using the found order_id
+        $json = json_encode([
+            'order_id' => $order->id,
+            'status' => [
+                'name' => $newStatusName,
+            ],
         ]);
+
+        $request = Request::create('/updateStatus', 'POST', [], [], [], [], $json);
+
+        // Create an instance of the controller
+        $controller = new OrderController();
+
+        // Call the method
+        $response = $controller->updateOrderStatus($request);
+
+        // Assert the response is a JsonResponse with a 200 status code
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(200, $response->getStatusCode());
+
+        // Adjust the expected message based on the actual response structure
+        $expectedMessage = json_encode([
+            'message' => [
+                'message' => "Order status for order_id {$order->id} has been updated from: new to: completed",
+                'order_id' => $order->id,
+            ],
+        ]);
+
+        $this->assertEquals($expectedMessage, $response->getContent());
     }
 
-    public function test_can_get_order_by_id()
+    /**
+     * Test updating order status with invalid JSON.
+     *
+     * @return void
+     */
+    public function testUpdateOrderStatusWithInvalidJson()
     {
-        $order = Order::factory()->create();
+        // Create a mock request with invalid JSON
+        $json = 'invalid_json';
 
-        $response = $this->getJson("/api/orders/{$order->id}");
+        $request = Request::create('/some-route', 'POST', [], [], [], [], $json);
 
-        $response->assertStatus(200)
-            ->assertJsonStructure(['data' => []]);
+        // Create an instance of the controller
+        $controller = new OrderController();
+
+        // Call the method
+        $response = $controller->updateOrderStatus($request);
+
+        // Assert the response is a JsonResponse with a 422 status code
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(422, $response->getStatusCode());
+
+        // Assert the response contains the expected error message
+        $expectedMessage = json_encode(['error' => 'Invalid JSON format']);
+        $this->assertEquals($expectedMessage, $response->getContent());
     }
 
-    public function test_can_update_order()
+    /**
+     * Test updating order status with invalid JSON.
+     *
+     * @return void
+     */
+    public function test_it_can_create_an_order()
     {
-        $order = Order::factory()->create();
-        $orderStatus = OrderStatus::factory()->create();
-        $billingAddress = Address::findOrNew(1);
-        $shippingAddress = Address::findOrNew(1);
-        $shippingMethod = ShippingMethod::factory()->create();
+        $this->seed();
+        $products = Product::take(2)->get();
 
-        $updatedOrderData = [
-            'start_date' => now()->format('Y-m-d'),
-            'end_date' => now()->addDays(5)->format('Y-m-d'),
-            'order_status_id' => $orderStatus->id,
-            'billing_address_id' => $billingAddress->id,
-            'shipping_address_id' => $shippingAddress->id,
-            'shipping_method_id' => $shippingMethod->id,
+        // Prepare data for the request
+        $data = [
+            'customer' => [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+            ],
+            'shipping_method' => 'home_delivery',
+            'billing_address' => [
+                'name' => 'Billing Name',
+                'postal_code' => '12345',
+                'city' => 'Billing City',
+                'street' => 'Billing Street',
+            ],
+            'shipping_address' => [
+                'name' => 'Shipping Name',
+                'postal_code' => '54321',
+                'city' => 'Shipping City',
+                'street' => 'Shipping Street',
+            ],
+            'products' => [
+                [
+                    'name' => $products[0]->name,
+                    'quantity' => 2
+                ],
+                [
+                    'name' => $products[1]->name,
+                    'quantity' => 2
+                ],
+            ],
         ];
 
-        $response = $this->putJson(route('orders.update', ['order' => $order->id]), $updatedOrderData);
+        // Make the request
+        $response = $this->json('POST', '/api/orders', $data);
 
-
-        $response->assertStatus(200)
-            ->assertJsonStructure(['data' => [], 'message']);
-
-        $this->assertDatabaseHas('orders', $updatedOrderData);
-    }
-
-    public function test_can_delete_order()
-    {
-        $order = Order::factory()->create();
-
-        $response = $this->deleteJson(route('orders.destroy', ['order' => $order->id]));
-
-        $response->assertStatus(200)
-                 ->assertJson(['message' => 'Order deleted successfully']);
-
-        $this->assertDatabaseMissing('orders', ['id' => $order->id]);
-
-        $this->assertNull(Order::find($order->id));
+        // Assertions
+        $response->assertStatus(201)
+            ->assertJson([
+                'message' => 'Order created successfully',
+            ]);
     }
 }

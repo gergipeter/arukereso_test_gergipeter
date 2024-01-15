@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Models;
 
+use App\Models\Customer;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Tests\TestCase;
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -14,10 +16,7 @@ class OrderTest extends TestCase
     {
         $order = new Order();
 
-        $fillable = [
-            'order_status_id', 'start_date', 'end_date', 'billing_address_id', 
-            'shipping_address_id', 'shipping_method_id'
-        ];
+        $fillable = ['customer_id', 'order_status_id', 'shipping_method_id', 'billing_address_id', 'shipping_address_id', 'start_date', 'end_date'];
 
         $this->assertEquals($fillable, $order->getFillable());
     }
@@ -27,13 +26,28 @@ class OrderTest extends TestCase
         $order = new Order();
 
         $this->assertInstanceOf(
-            \Illuminate\Database\Eloquent\Relations\BelongsTo::class,
-            $order->status()
+            BelongsTo::class,
+            $order->orderStatus()
         );
 
         $this->assertInstanceOf(
             OrderStatus::class,
-            $order->status()->getRelated()
+            $order->orderStatus()->getRelated()
+        );
+    }
+
+    public function test_order_belongs_to_customer()
+    {
+        $order = new Order();
+
+        $this->assertInstanceOf(
+            BelongsTo::class,
+            $order->customer()
+        );
+
+        $this->assertInstanceOf(
+            Customer::class,
+            $order->customer()->getRelated()
         );
     }
 
@@ -42,7 +56,7 @@ class OrderTest extends TestCase
         $order = new Order();
 
         $this->assertInstanceOf(
-            \Illuminate\Database\Eloquent\Relations\BelongsTo::class,
+            BelongsTo::class,
             $order->billingAddress()
         );
 
@@ -57,7 +71,7 @@ class OrderTest extends TestCase
         $order = new Order();
 
         $this->assertInstanceOf(
-            \Illuminate\Database\Eloquent\Relations\BelongsTo::class,
+            BelongsTo::class,
             $order->shippingAddress()
         );
 
@@ -72,7 +86,7 @@ class OrderTest extends TestCase
         $order = new Order();
 
         $this->assertInstanceOf(
-            \Illuminate\Database\Eloquent\Relations\BelongsTo::class,
+            BelongsTo::class,
             $order->shippingMethod()
         );
 

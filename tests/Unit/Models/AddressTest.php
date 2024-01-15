@@ -2,25 +2,25 @@
 
 namespace Tests\Unit\Models;
 
+use App\Models\Order;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Tests\TestCase;
 use App\Models\Address;
-use App\Models\Customer;
 
 class AddressTest extends TestCase
 {
-    public function test_address_has_customers_relation()
+    public function test_address_has_orders_relation()
     {
         $address = new Address();
 
         $this->assertInstanceOf(
             HasMany::class,
-            $address->customers()
+            $address->orders()
         );
 
         $this->assertInstanceOf(
-            Customer::class,
-            $address->customers()->getRelated()
+            Order::class,
+            $address->orders()->getRelated()
         );
     }
 
