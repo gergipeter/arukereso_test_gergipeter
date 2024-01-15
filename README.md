@@ -36,4 +36,4 @@ Technologies used in the project:
 
 
 <h2>📃Documentation</h2>
-* [Download&nbsp;5](https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf)
+[Download](https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf)
