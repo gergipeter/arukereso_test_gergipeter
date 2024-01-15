@@ -10,16 +10,31 @@
 ```bash
     git clone https://github.com/gergipeter/arukereso_test_gergipeter.git
     cd arukereso_test_gergipeter
+```
+<h5>Run Composer Update</h5>
+
+```bash
     composer update
-    cp .env.example .env (setup mysql username, and password)
+```
+<h5>Set up your MySQL username and password in the .env file</h5>
+
+```bash
+    cp .env.example .env
+```
+<h5>Migrations, Tests, Seeders</h5>
+
+```bash
     php artisan key:generate
     php artisan migrate
     php artisan test --testdox
     php artisan db:seed
-
-    php artisan serve
-
 ```
+<h5>Start Server</h5>
+
+```bash
+    php artisan serve
+```
+
 
 <h2>📖 Start Page - Swagger API DOC</h2>
 
