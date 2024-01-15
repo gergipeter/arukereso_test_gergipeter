@@ -66,7 +66,7 @@ class OrderController extends Controller
      *     summary="List orders with filters",
      *     @OA\RequestBody(
      *         @OA\JsonContent(
-     *             @OA\Property(property="order_id", type="integer"),
+     *             @OA\Property(property="order_id", type="integer", example="1"),
      *             @OA\Property(property="status", type="object",
      *                 @OA\Property(property="name", type="string", description="New order status name", enum={"new", "completed"})
      *             ),
@@ -169,8 +169,7 @@ class OrderController extends Controller
      *         @OA\Property(property="name", type="string", example="John Doe"),
      *         @OA\Property(property="email", type="string", format="email", example="john.doe@example.com")
      *     ),
-     *     @OA\Property(property="shipping_method", type="object",
-     *         @OA\Property(property="name", type="string", description="New shipping method name", enum={"pickup", "home_delivery"})
+     *     @OA\Property(property="shipping_method", type="string", enum={"pickup", "home_delivery"}
      *     ),
      *     @OA\Property(property="billing_address", type="object",
      *         @OA\Property(property="name", type="string", example="John Doe"),
@@ -187,12 +186,6 @@ class OrderController extends Controller
      *     @OA\Property(property="products", type="array",
      *         @OA\Items(
      *             @OA\Property(property="name", type="string", example="Stellar"),
-     *             @OA\Property(property="quantity", type="integer", example=2),
-     *         )
-     *     ),
-     *     @OA\Property(property="products", type="array",
-     *         @OA\Items(
-     *             @OA\Property(property="name", type="string", example="Pinnacle"),
      *             @OA\Property(property="quantity", type="integer", example=2),
      *         )
      *     ),
@@ -320,21 +313,37 @@ class OrderController extends Controller
 
     /**
      * @OA\Post(
-    *     path="/api/update-order-status",
+     *     path="/api/orders/updateStatus",
      *     summary="Update order status",
      *     operationId="updateOrderStatus",
      *     tags={"Orders"},
-     *     summary="Update a specific order by ID",
+     *     description="Update multiple orders' status by providing an array of status update objects.",
      *     @OA\RequestBody(
-     *         required=true,
-     *         description="JSON input for updating order status",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="order_id", type="integer", description="ID of the order to be updated"),
-     *             @OA\Property(property="status", type="object",
-     *                 @OA\Property(property="name", type="string", description="New order status name", enum={"new", "completed"})
-     *             )
-     *         )
+     *        required=true,
+     *        description="JSON input for updating order status",
+     *        @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                  type="object",
+     *                  @OA\Property(
+     *                      property="order_id",
+     *                      type="integer",
+     *                      example=1
+     *                  ),
+     *                  @OA\Property(
+     *                      property="status",
+     *                      type="object",
+     *                      @OA\Property(
+     *                          property="name",
+     *                          type="string",
+     *                          example="new"
+     *                      )
+     *                  ),
+     *             ),
+     *        ),
      *     ),
+     *
+     *
      *     @OA\Response(response="200", description="Order updated successfully"),
      *     @OA\Response(response="404", description="Order not found"),
      *     @OA\Response(response="422", description="Validation error"),

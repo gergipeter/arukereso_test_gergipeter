@@ -21,7 +21,8 @@
                             "schema": {
                                 "properties": {
                                     "order_id": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "example": "1"
                                     },
                                     "status": {
                                         "properties": {
@@ -95,17 +96,11 @@
                                         "type": "object"
                                     },
                                     "shipping_method": {
-                                        "properties": {
-                                            "name": {
-                                                "description": "New shipping method name",
-                                                "type": "string",
-                                                "enum": [
-                                                    "pickup",
-                                                    "home_delivery"
-                                                ]
-                                            }
-                                        },
-                                        "type": "object"
+                                        "type": "string",
+                                        "enum": [
+                                            "pickup",
+                                            "home_delivery"
+                                        ]
                                     },
                                     "billing_address": {
                                         "properties": {
@@ -155,7 +150,7 @@
                                             "properties": {
                                                 "name": {
                                                     "type": "string",
-                                                    "example": "Product A"
+                                                    "example": "Stellar"
                                                 },
                                                 "quantity": {
                                                     "type": "integer",
@@ -181,12 +176,13 @@
                 }
             }
         },
-        "/api/update-order-status": {
+        "/api/orders/updateStatus": {
             "post": {
                 "tags": [
                     "Orders"
                 ],
-                "summary": "Update a specific order by ID",
+                "summary": "Update order status",
+                "description": "Update multiple orders' status by providing an array of status update objects.",
                 "operationId": "updateOrderStatus",
                 "requestBody": {
                     "description": "JSON input for updating order status",
@@ -194,26 +190,25 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "properties": {
-                                    "order_id": {
-                                        "description": "ID of the order to be updated",
-                                        "type": "integer"
-                                    },
-                                    "status": {
-                                        "properties": {
-                                            "name": {
-                                                "description": "New order status name",
-                                                "type": "string",
-                                                "enum": [
-                                                    "new",
-                                                    "completed"
-                                                ]
-                                            }
+                                "type": "array",
+                                "items": {
+                                    "properties": {
+                                        "order_id": {
+                                            "type": "integer",
+                                            "example": 1
                                         },
-                                        "type": "object"
-                                    }
-                                },
-                                "type": "object"
+                                        "status": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "new"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
                             }
                         }
                     }
