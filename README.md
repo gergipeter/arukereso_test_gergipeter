@@ -11,7 +11,7 @@
     git clone https://github.com/gergipeter/arukereso_test_gergipeter.git
     cd arukereso_test_gergipeter
     composer update
-    cp .env.example .env
+    cp .env.example .env (setup mysql username, and password)
     php artisan key:generate
     php artisan migrate
     php artisan test
