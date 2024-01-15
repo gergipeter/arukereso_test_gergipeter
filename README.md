@@ -1,4 +1,5 @@
-Arukereso Orders API - Test Homework
+
+<h1>Arukereso Orders API - Test Homework</h1>
 
 <h2>🖥 Screenshot:</h2>
 
@@ -18,6 +19,8 @@ Arukereso Orders API - Test Homework
 
     php artisan serve
 
+    http://127.0.0.1:8000/api/doc
+
 ```
 
 
@@ -33,4 +36,4 @@ Technologies used in the project:
 
 
 <h2>📃Documentation</h2>
-[Link text Here]([https://link-url-here.org](https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf)https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf)
+[Download](https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf)
