@@ -1,6 +1,10 @@
 
 <h1>Arukereso Orders API - Test Homework</h1>
 
+<h2>📃Documentation with sample JSON parameters</h2>
+
+[Download](https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf)
+
 <h2>🖥 Screenshot:</h2>
 
 ![screenshot](https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/screenshot.PNG)
@@ -48,8 +52,3 @@ Technologies used in the project:
 -  **MySQL** 8.0.35
 -  **Laravel** 10.40.0
 
-
-
-<h2>📃Documentation with sample JSON parameters</h2>
-
-[Download](https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf)
