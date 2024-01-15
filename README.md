@@ -14,7 +14,7 @@
     cp .env.example .env (setup mysql username, and password)
     php artisan key:generate
     php artisan migrate
-    php artisan test
+    php artisan test --testdox
     php artisan db:seed
 
     php artisan serve
@@ -36,4 +36,4 @@ Technologies used in the project:
 
 
 <h2>📃Documentation</h2>
-[Download](https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf)
+* [Download&nbsp;5](https://github.com/gergipeter/arukereso_test_gergipeter/blob/main/arukereso_order_api_technical_doc.pdf)
