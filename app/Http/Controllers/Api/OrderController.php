@@ -149,7 +149,7 @@ class OrderController extends Controller
                 return response()->json($responseData, Response::HTTP_OK);
             } else {
                 // No filters applied, return an empty response
-                return response()->json(['asfsf'], Response::HTTP_OK);
+                return response()->json([], Response::HTTP_OK);
             }
          } catch (QueryException $e) {
              return response()->json(['error' => $e], Response::HTTP_INTERNAL_SERVER_ERROR);
